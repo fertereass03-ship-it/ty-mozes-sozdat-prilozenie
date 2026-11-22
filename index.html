@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="AI App Builder — платформа для создания приложений и веб-сайтов с помощью искусственного интеллекта">
+    <meta name="theme-color" content="#0B0B0F">
+    <meta name="color-scheme" content="dark">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="robots" content="index, follow">
+    <meta property="og:title" content="AI App Builder — Создание приложений с ИИ">
+    <meta property="og:description" content="Создавайте приложения и веб-сайты с помощью искусственного интеллекта. Генерация кода, предпросмотр в реальном времени, экспорт проектов.">
+    <meta property="og:type" content="website">
+
+    <title>AI App Builder — Создание приложений с ИИ</title>
+
+    <!-- Inline SVG Favicon — AI Robot Icon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23FF8A00'/%3E%3Cstop offset='100%25' stop-color='%23FFB347'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='14' fill='%230B0B0F'/%3E%3Ccircle cx='32' cy='10' r='3.5' fill='url(%23g)'/%3E%3Crect x='30.5' y='13' width='3' height='5' rx='1.5' fill='url(%23g)'/%3E%3Crect x='14' y='18' width='36' height='28' rx='8' fill='url(%23g)'/%3E%3Ccircle cx='24' cy='30' r='4.5' fill='%230B0B0F'/%3E%3Ccircle cx='40' cy='30' r='4.5' fill='%230B0B0F'/%3E%3Ccircle cx='24' cy='30' r='2' fill='%23fff'/%3E%3Ccircle cx='40' cy='30' r='2' fill='%23fff'/%3E%3Crect x='26' y='38' width='12' height='3' rx='1.5' fill='%230B0B0F'/%3E%3Crect x='8' y='26' width='5' height='12' rx='2.5' fill='url(%23g)'/%3E%3Crect x='51' y='26' width='5' height='12' rx='2.5' fill='url(%23g)'/%3E%3Crect x='20' y='47' width='6' height='8' rx='3' fill='url(%23g)'/%3E%3Crect x='38' y='47' width='6' height='8' rx='3' fill='url(%23g)'/%3E%3C/svg%3E">
+
+    <!-- Google Fonts — Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <!-- Material Design Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@7.4.47/css/materialdesignicons.min.css">
+
+    <!-- highlight.js Theme -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
+
+    <!-- Application Stylesheets -->
+    <link rel="stylesheet" href="css/variables.css">
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/workspace.css">
+    <link rel="stylesheet" href="css/animations.css">
+
+    <!-- Loading Screen Styles -->
+    <style>
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #0B0B0F;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            overflow: hidden;
+        }
+
+        /* ========== Loading Screen ========== */
+        #loading-screen {
+            position: fixed;
+            inset: 0;
+            z-index: 99999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-color: #0B0B0F;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+        }
+
+        #loading-screen.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        /* Animated gradient ring */
+        .loader-icon {
+            position: relative;
+            width: 96px;
+            height: 96px;
+            margin-bottom: 32px;
+        }
+
+        .loader-ring {
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            border: 3px solid transparent;
+            border-top-color: #FF8A00;
+            border-right-color: #FFB347;
+            animation: loader-spin 1.2s cubic-bezier(0.6, 0.15, 0.35, 0.85) infinite;
+        }
+
+        .loader-ring::before {
+            content: '';
+            position: absolute;
+            inset: 6px;
+            border-radius: 50%;
+            border: 2px solid transparent;
+            border-top-color: #FFB347;
+            border-left-color: #FF8A00;
+            animation: loader-spin 1.8s cubic-bezier(0.6, 0.15, 0.35, 0.85) infinite reverse;
+        }
+
+        .loader-ring::after {
+            content: '';
+            position: absolute;
+            inset: 14px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255, 138, 0, 0.15) 0%, transparent 70%);
+            animation: loader-pulse 2s ease-in-out infinite;
+        }
+
+        /* Inner AI icon */
+        .loader-ai-icon {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .loader-ai-icon svg {
+            width: 40px;
+            height: 40px;
+            animation: loader-pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes loader-spin {
+            0%   { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes loader-pulse {
+            0%, 100% { opacity: 0.6; transform: scale(0.95); }
+            50%      { opacity: 1;   transform: scale(1.05); }
+        }
+
+        @keyframes loader-text-pulse {
+            0%, 100% { opacity: 0.7; }
+            50%      { opacity: 1; }
+        }
+
+        @keyframes loader-dots {
+            0%, 20%  { content: ''; }
+            40%      { content: '.'; }
+            60%      { content: '..'; }
+            80%, 100%{ content: '...'; }
+        }
+
+        .loader-title {
+            font-size: 28px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #FF8A00 0%, #FFB347 50%, #FF8A00 100%);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: loader-gradient-shift 3s ease infinite, loader-text-pulse 2s ease-in-out infinite;
+            margin-bottom: 12px;
+            letter-spacing: -0.02em;
+        }
+
+        @keyframes loader-gradient-shift {
+            0%   { background-position: 0% center; }
+            50%  { background-position: 100% center; }
+            100% { background-position: 0% center; }
+        }
+
+        .loader-subtitle {
+            font-size: 14px;
+            font-weight: 400;
+            color: rgba(255, 255, 255, 0.4);
+            letter-spacing: 0.04em;
+            animation: loader-text-pulse 2s ease-in-out infinite 0.3s;
+        }
+
+        .loader-subtitle::after {
+            content: '';
+            animation: loader-dots 1.5s steps(1, end) infinite;
+        }
+
+        /* ========== No-Script Fallback ========== */
+        .noscript-container {
+            position: fixed;
+            inset: 0;
+            z-index: 100000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-color: #0B0B0F;
+            color: #fff;
+            font-family: 'Inter', sans-serif;
+            text-align: center;
+            padding: 24px;
+        }
+
+        .noscript-container h1 {
+            font-size: 24px;
+            font-weight: 700;
+            color: #FF8A00;
+            margin-bottom: 16px;
+        }
+
+        .noscript-container p {
+            font-size: 15px;
+            color: rgba(255, 255, 255, 0.6);
+            max-width: 420px;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- No-Script Fallback -->
+    <noscript>
+        <div class="noscript-container">
+            <h1>⚠️ JavaScript отключён</h1>
+            <p>
+                Для работы <strong>AI App Builder</strong> необходим JavaScript.
+                Пожалуйста, включите JavaScript в настройках вашего браузера и обновите страницу.
+            </p>
+        </div>
+    </noscript>
+
+    <!-- Loading Screen -->
+    <div id="loading-screen">
+        <div class="loader-icon">
+            <div class="loader-ring"></div>
+            <div class="loader-ai-icon">
+                <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="24" cy="7" r="2.5" fill="#FF8A00"/>
+                    <rect x="22.5" y="9" width="3" height="4" rx="1.5" fill="#FF8A00"/>
+                    <rect x="10" y="13" width="28" height="22" rx="7" fill="url(#loaderGrad)"/>
+                    <circle cx="18" cy="22" r="3.5" fill="#0B0B0F"/>
+                    <circle cx="30" cy="22" r="3.5" fill="#0B0B0F"/>
+                    <circle cx="18" cy="22" r="1.5" fill="#fff"/>
+                    <circle cx="30" cy="22" r="1.5" fill="#fff"/>
+                    <rect x="19" y="29" width="10" height="2.5" rx="1.25" fill="#0B0B0F"/>
+                    <rect x="5" y="19" width="4" height="10" rx="2" fill="#FF8A00"/>
+                    <rect x="39" y="19" width="4" height="10" rx="2" fill="#FF8A00"/>
+                    <rect x="15" y="36" width="5" height="6" rx="2.5" fill="#FF8A00"/>
+                    <rect x="28" y="36" width="5" height="6" rx="2.5" fill="#FF8A00"/>
+                    <defs>
+                        <linearGradient id="loaderGrad" x1="10" y1="13" x2="38" y2="35" gradientUnits="userSpaceOnUse">
+                            <stop stop-color="#FF8A00"/>
+                            <stop offset="1" stop-color="#FFB347"/>
+                        </linearGradient>
+                    </defs>
+                </svg>
+            </div>
+        </div>
+        <div class="loader-title">AI App Builder</div>
+        <div class="loader-subtitle">Загрузка</div>
+    </div>
+
+    <!-- Vue Application Mount Point -->
+    <div id="app"></div>
+
+    <!-- ============================================================
+         External Libraries
+         ============================================================ -->
+
+    <!-- Vue 3 (Global Build) -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+
+    <!-- Monaco Editor AMD Loader -->
+    <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs/loader.js"></script>
+
+    <!-- JSZip — project export -->
+    <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+
+    <!-- FileSaver — download triggers -->
+    <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
+
+    <!-- marked.js — Markdown rendering in chat -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+    <!-- highlight.js — Syntax highlighting in chat code blocks -->
+    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
+
+    <!-- ============================================================
+         Monaco Editor Configuration
+         ============================================================ -->
+    <script>
+        // Configure Monaco AMD loader paths before any component tries to use it.
+        (function () {
+            'use strict';
+
+            var MONACO_CDN = 'https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min';
+
+            // AMD require is exposed by monaco's loader.js
+            if (typeof require !== 'undefined' && typeof require.config === 'function') {
+                require.config({
+                    paths: {
+                        vs: MONACO_CDN + '/vs'
+                    }
+                });
+            }
+
+            // Pre-load Monaco's core module so it is ready when Vue components request an editor.
+            // The resolved `monaco` object is stored on `window` for convenient access.
+            window.__monacoReady = new Promise(function (resolve, reject) {
+                if (typeof require !== 'undefined') {
+                    require(['vs/editor/editor.main'], function (monaco) {
+                        window.monaco = monaco;
+                        resolve(monaco);
+                    }, function (err) {
+                        console.error('[Monaco] Failed to load:', err);
+                        reject(err);
+                    });
+                } else {
+                    reject(new Error('AMD loader (require) is not available.'));
+                }
+            });
+
+            // Configure marked.js for safe rendering with highlight.js integration.
+            if (typeof marked !== 'undefined') {
+                marked.setOptions({
+                    breaks: true,
+                    gfm: true,
+                    highlight: function (code, lang) {
+                        if (typeof hljs !== 'undefined' && lang && hljs.getLanguage(lang)) {
+                            try {
+                                return hljs.highlight(code, { language: lang }).value;
+                            } catch (_) { /* fall through */ }
+                        }
+                        return code;
+                    }
+                });
+            }
+        })();
+    </script>
+
+    <!-- ============================================================
+         Application Entry Point (ES Module)
+         ============================================================ -->
+    <script type="module" src="js/app.js"></script>
+
+    <!-- ============================================================
+         Dismiss Loading Screen once Vue app is mounted
+         ============================================================ -->
+    <script>
+        (function () {
+            'use strict';
+
+            // Hide the loading screen after the Vue app mounts OR after a maximum timeout.
+            var MAX_WAIT = 12000; // ms
+
+            function hideLoader() {
+                var el = document.getElementById('loading-screen');
+                if (el && !el.classList.contains('hidden')) {
+                    el.classList.add('hidden');
+                    // Remove from DOM after transition ends to free memory.
+                    setTimeout(function () {
+                        if (el.parentNode) el.parentNode.removeChild(el);
+                    }, 600);
+                }
+            }
+
+            // The Vue app.js should dispatch this event after mount:
+            //   window.dispatchEvent(new Event('app-mounted'));
+            window.addEventListener('app-mounted', hideLoader);
+
+            // Safety net: hide loader even if the event never fires.
+            setTimeout(hideLoader, MAX_WAIT);
+        })();
+    </script>
+</body>
+</html>
